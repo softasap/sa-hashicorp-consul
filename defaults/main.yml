@@ -1,0 +1,9 @@
+---
+# defaults file for sa-hashicorp-consul
+
+root_dir: "{{role_path}}"
+role_dir: "{{role_path}}"
+
+consul_version: 0.6.4
+consul_path: "/usr/local/bin"
+

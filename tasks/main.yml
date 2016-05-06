@@ -1,0 +1,3 @@
+---
+# tasks file for sa-hashicorp-consul
+  - include: tasks_consul.yml
