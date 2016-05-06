@@ -1,6 +1,6 @@
 ---
   - name: Consul | Check if is present
-     command: test -x {{consul_path}}/consul
+     command: "test -x {{consul_path}}/consul"
      ignore_errors: yes
      register: consul_present
      tags:
