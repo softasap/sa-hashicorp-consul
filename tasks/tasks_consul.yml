@@ -1,29 +1,30 @@
 ---
   - name: Consul | Check if is present
-    command: "test -x {{consul_path}}/consul"
+    command: "test -x {{ consul_path }}/consul"
     ignore_errors: yes
+    changed_when: False
     register: consul_present
     tags:
      - consul
 
   - name: Consul | Dependencies
-    apt: pkg="{{item}}" state="present"
+    apt: pkg="{{ item }}" state="present"
     with_items:
      - curl
      - unzip
-    when: consul_present | failed
+    when: consul_present is failed
     tags:
      - consul
 
   - name: Consul | Download
-    get_url: url="https://releases.hashicorp.com/consul/{{consul_version}}/consul_{{consul_version}}_{{consul_platform | default('linux')}}_amd64.zip" dest="/tmp/consul.zip"
-    when: consul_present | failed
+    get_url: url="https://releases.hashicorp.com/consul/{{ consul_version }}/consul_{{ consul_version }}_{{ consul_platform | default('linux') }}_amd64.zip" dest="/tmp/consul.zip"
+    when: consul_present is failed
     tags:
      - consul
 
   - name: Consul | Install
-    unarchive: src=/tmp/consul.zip dest="{{consul_path}}" copy=no
+    unarchive: src=/tmp/consul.zip dest="{{ consul_path }}" copy=no
     become: yes
-    when: consul_present | failed
+    when: consul_present is failed
     tags:
      - consul

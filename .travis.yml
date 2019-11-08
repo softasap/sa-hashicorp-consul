@@ -59,7 +59,6 @@ env:
 #    init: /sbin/init
 #    playbook: test.yml
 
-
 # whitelist
 branches:
   only:
@@ -74,6 +73,8 @@ before_install:
   - 'sudo docker pull ${distribution}:${version}'
   # Customize container
   - 'sudo docker build --rm=true --file=tests/Dockerfile.${distribution}-${version} --tag=${distribution}-${version}:ansible tests'
+  - 'sudo docker run --rm --privileged -v /:/host ${distribution}-${version}:ansible setup || true'
+  - 'sudo mkdir -p /tmp/cgroup/systemd && sudo mount -t cgroup systemd /tmp/cgroup/systemd -o ro,noexec,nosuid,nodev,none,name=systemd'
 
 script:
   - container_id=$(mktemp)
@@ -83,8 +84,15 @@ script:
   # Ansible syntax check.
   - 'sudo docker exec --tty "$(cat ${container_id})" env TERM=xterm ansible-playbook /etc/ansible/roles/role_under_test/tests/${playbook} --syntax-check'
 
+  # Ansible linting
+  - 'sudo docker exec --tty "$(cat ${container_id})" env TERM=xterm ansible-lint -c /etc/ansible/roles/role_under_test/.ansible-lint /etc/ansible/roles/role_under_test || true'
+
+
   # Test role.
   - 'sudo docker exec --tty "$(cat ${container_id})" env TERM=xterm ansible-playbook /etc/ansible/roles/role_under_test/tests/${playbook}'
+
+  # Debug in case of idempotence fail
+  # - 'sudo docker exec --tty "$(cat ${container_id})" env TERM=xterm ansible-playbook /etc/ansible/roles/role_under_test/tests/${playbook}'
 
   # Test role idempotence.
   - >
